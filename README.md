@@ -27,7 +27,7 @@ Studio Pro 11.12.1 or later.
 
 ## Installation
 
-Install it from the Mendix Marketplace, or import `TodoExplorer.mxmodule` from the [releases](../../releases) via **App Explorer > right-click the app > Import module package**.
+Install it from the [Mendix Marketplace](https://marketplace.mendix.com/link/component/308644), or import `TodoExplorer.mxmodule` from the [releases](../../releases) via **App Explorer > right-click the app > Import module package**.
 
 ## Known limitations
 
