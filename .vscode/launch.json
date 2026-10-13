@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch StudioPro with debugger attached",
+            "type": "msedge",
+            "useWebView": true,
+            "runtimeExecutable": "C:\\Program Files\\Mendix\\${input:studioProVersion}\\modeler\\studiopro.exe",
+            "runtimeArgs": ["${input:mprPath}", "--enable-extension-development", "--enable-web-extensions"],
+            "request": "launch",
+            "webRoot": "${workspaceFolder}/dist/todo-explorer"
+        }
+    ],
+    "inputs": [
+        { "id": "studioProVersion", "type": "promptString", "description": "Studio Pro version", "default": "11.12.1" },
+        { "id": "mprPath", "type": "promptString", "description": "Path to the Mendix app .mpr file" }
+    ]
+}
