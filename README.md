@@ -1,4 +1,5 @@
 # TODO Explorer
+n![TODO Explorer: every TODO, FIXME and HACK from your microflows and nanoflows in one pane](assets/cover-1200x840.png)
 
 A Studio Pro extension that lists every `TODO`, `FIXME` and `HACK` annotation in your microflows and nanoflows in one dockable pane.
 
