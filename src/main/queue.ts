@@ -1,5 +1,5 @@
-// Backend Studio Pro obsługuje wywołania Model API po kolei, a równoległe tworzenie jednostek kończyło się błędem 500 –
-// dlatego wszystkie wywołania idą przez jedną kolejkę.
+// The Studio Pro backend handles Model API calls one at a time, and parallel unit creation failed with HTTP 500,
+// so every call goes through a single queue.
 export class Queue {
     private tail: Promise<unknown> = Promise.resolve();
 

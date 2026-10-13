@@ -1,6 +1,6 @@
-// Dane testowe dla aplikacji testowej (bez pętli – pętle bez konfiguracji dają błędy CE0099/CE0104/CE0105).
-// Uruchomienie: node scripts/sp.mjs eval "$(cat scripts/seed-test-data.js)"
-// Idempotentne: pomija mikroflowy, które już istnieją.
+// Sample data for a test app (no loops: unconfigured loops cause errors CE0099/CE0104/CE0105).
+// Run: node scripts/sp.mjs eval "$(cat scripts/seed-test-data.js)"
+// Idempotent: skips microflows that already exist.
 (async () => {
     const sp = todoExplorer.studioPro, mf = sp.app.model.microflows;
     const mod = await sp.app.model.modules.getModule("MyFirstModule");

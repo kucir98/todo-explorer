@@ -23,7 +23,7 @@ export function modelPortFrom(studioPro: StudioPro): ModelPort {
         unitsInfo: async kind => [...(await access(kind).getUnitsInfo())],
         load: (kind, ids) => {
             const wanted = new Set(ids);
-            // drugi argument obowiązkowy, domyślnie ładuje tylko 10 jednostek
+            // the second argument is required: by default only 10 units are loaded
             return access(kind).loadAll(u => wanted.has(u.$ID), ids.length);
         }
     };
@@ -76,12 +76,12 @@ export class TodoCache {
         return this.lastFailed ? this.exec(this.lastFailed) : Promise.resolve();
     }
 
-    // wszystkie operacje przez kolejkę; błąd → status error, dane bez zmian, bez rzucania dalej
+    // every operation goes through the queue; on failure: error status, data unchanged, nothing rethrown
     private exec(op: () => Promise<void>): Promise<void> {
         return this.queue.run(async () => {
             try {
                 await op.call(this);
-                // udany pełny skan zastępuje każdą wcześniejszą nieudaną operację
+                // a successful full scan supersedes any earlier failed operation
                 if (this.lastFailed === op || op === this.fullScan) this.lastFailed = null;
             } catch (e) {
                 console.error("TODO Explorer:", e);
@@ -108,7 +108,7 @@ export class TodoCache {
         return all;
     }
 
-    // ładuje kandydatów paczkami; postęp tylko gdy podano total (pełny skan)
+    // loads candidates in batches; reports progress only when given (full scan)
     private async loadInto(target: Map<string, DocumentEntry>, list: Candidate[], progress?: { done: number; total: number }) {
         for (const kind of KINDS) {
             const ofKind = list.filter(c => c.kind === kind);
@@ -132,7 +132,7 @@ export class TodoCache {
     }
 
     private async fullScan() {
-        // includeMarketplace może się zmienić w trakcie skanu – zapamiętujemy wartość, z którą skanujemy
+        // includeMarketplace can change during the scan, so keep the value this scan started with
         const include = this.includeMarketplace;
         await this.loadModules();
         const list = (await this.candidates()).filter(c => include || !this.isAppStore(c.module));
@@ -143,8 +143,8 @@ export class TodoCache {
         this.scanned = true;
     }
 
-    // przed pierwszym skanem zdarzenia ignorujemy – pełny skan i tak je pokryje, a nie obciążamy backendu
-    // u użytkowników, którzy panelu nie otwierają
+    // ignore events before the first scan: the full scan covers them anyway,
+    // and users who never open the pane shouldn't put load on the backend
     private async reload(ids: string[]) {
         if (!this.scanned) return;
         const wanted = new Set(ids);

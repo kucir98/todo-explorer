@@ -30,7 +30,7 @@ export function buildTree(documents: DocumentEntry[], filters: Filters): TreeMod
 
 const plural = (n: number, word: string) => `${n.toLocaleString("en-US")} ${word}${n === 1 ? "" : "s"}`;
 
-// licznik w pasku narzędzi: tylko to, co widać po filtrach
+// toolbar counter: only what is visible after filtering
 export function summaryLabel(tree: TreeModule[]): string {
     const items = tree.reduce((n, m) => n + m.count, 0);
     const documents = tree.reduce((n, m) => n + m.documents.length, 0);

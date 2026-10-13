@@ -14,7 +14,7 @@ export const component: IComponent = {
         const cache: TodoCache = new TodoCache(modelPortFrom(studioPro), new Queue(), () =>
             void messages.sendMessage<StateMessage, never>({ type: "state", ...cache.getState() }));
 
-        // handler przed rejestracją panelu – panel przywrócony z layoutu może od razu wysłać getState
+        // register the handler before the pane: a pane restored from the layout may send getState right away
         await messages.addMessageHandler<PaneRequest>(async ({ message }) => {
             void cache.ensureScanned();
             switch (message.type) {
@@ -37,7 +37,7 @@ export const component: IComponent = {
             action: () => studioPro.ui.panes.open(pane)
         });
 
-        // zmiany zbierane przez 300 ms – jedna edycja potrafi wysłać kilka zdarzeń
+        // collect changes for 300 ms: a single edit can fire several events
         let pending = new Set<string>();
         let timer: ReturnType<typeof setTimeout> | undefined;
         const onDocuments = (docs: { documentId: string; documentType: string | null }[]) => {

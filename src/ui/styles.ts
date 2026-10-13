@@ -1,4 +1,4 @@
-// style jako string wstrzykiwany do <head> – strona panelu w Studio Pro nie ładuje osobnego pliku CSS z bundla
+// styles as a string injected into <head>: the Studio Pro pane page doesn't load a separate CSS file from the bundle
 export const css = `
 :root[data-theme="light"] {
   --bg: #ffffff; --bg-hover: #f0f0f0; --bg-bar: #f6f6f6; --fg: #1e1e1e; --fg-muted: #6e6e6e; --border: #e0e0e0;

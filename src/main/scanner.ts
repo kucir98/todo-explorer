@@ -1,7 +1,7 @@
 import type { Microflows } from "@mendix/extensions-api";
 import type { Marker, TodoItem } from "../shared/types";
 
-// case-sensitive: „todo” małymi literami częściej trafia się w zwykłym tekście
+// case-sensitive: lowercase "todo" shows up in ordinary text too often
 const MARKER = /\b(TODO|FIXME|HACK)\b/;
 
 export function parseCaption(caption: string): Omit<TodoItem, "elementId"> | null {

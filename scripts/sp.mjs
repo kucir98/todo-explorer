@@ -1,12 +1,12 @@
-// Sterowanie Studio Pro z linii poleceń przez CDP (WebView2 remote debugging).
-//   node scripts/sp.mjs start            – uruchamia Studio Pro z flagami dev i portem CDP (odmawia, gdy Studio Pro już działa)
-//   node scripts/sp.mjs stop             – zamyka instancję z `start` (łagodnie, bez /F); cudzych nie rusza
-//   node scripts/sp.mjs wait             – czeka, aż rozszerzenie będzie gotowe
-//   node scripts/sp.mjs targets          – lista celów CDP
-//   node scripts/sp.mjs eval "<wyrażenie>" – wykonuje JS w kontekście rozszerzenia (await dozwolony), wypisuje JSON
-//   node scripts/sp.mjs logs [sekundy]   – zbiera console.* z rozszerzenia przez N sekund (domyślnie 10)
-//   node scripts/sp.mjs shot <fragment URL> <plik.png> – zrzut ekranu strony, np. panelu (uiEntryPoint=pane)
-// Uchwyt w rozszerzeniu (tylko build dev): todoExplorer = { studioPro, cache, openPane }
+// Drives Studio Pro from the command line over CDP (WebView2 remote debugging).
+//   node scripts/sp.mjs start            – starts Studio Pro with dev flags and the CDP port (refuses if Studio Pro is already running)
+//   node scripts/sp.mjs stop             – closes the instance started by `start` (gracefully, no /F); never touches other instances
+//   node scripts/sp.mjs wait             – waits until the extension is ready
+//   node scripts/sp.mjs targets          – lists CDP targets
+//   node scripts/sp.mjs eval "<expression>" – runs JS in the extension context (await allowed), prints JSON
+//   node scripts/sp.mjs logs [seconds]   – collects console.* from the extension for N seconds (default 10)
+//   node scripts/sp.mjs shot <URL part> <file.png> – screenshot of a page, e.g. the pane (uiEntryPoint=pane)
+// Handle exposed by the extension (dev build only): todoExplorer = { studioPro, cache, openPane }
 import { spawn, execSync } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -60,11 +60,11 @@ function connect(wsUrl) {
     });
 }
 
-// main.js rozszerzeń działa w dedykowanym workerze strony component-host (mode=main);
-// workery nie odpowiadają na bezpośrednie połączenie, więc podpinamy się przez stronę (flatten)
+// extension main.js runs in a dedicated worker of the component-host page (mode=main);
+// workers don't answer direct connections, so we attach through the page (flatten)
 async function extensionTarget() {
     const host = (await targets()).find(t => t.type === "page" && t.url.includes("component-host"));
-    if (!host) throw new Error("Brak strony component-host – czy Studio Pro działa (node scripts/sp.mjs start)?");
+    if (!host) throw new Error("No component-host page – is Studio Pro running (node scripts/sp.mjs start)?");
     const c = await connect(host.webSocketDebuggerUrl);
     const sessions = [];
     c.on(m => m.method === "Target.attachedToTarget" && sessions.push(m.params.sessionId));
@@ -75,7 +75,7 @@ async function extensionTarget() {
         if (r?.result?.result?.value === "object") return { ...c, sessionId: s, send: (m, p, _s, t) => c.send(m, p, s, t) };
     }
     c.close();
-    throw new Error("Nie znaleziono workera z globalThis.todoExplorer (czy rozszerzenie jest załadowane?)");
+    throw new Error("No worker with globalThis.todoExplorer found (is the extension loaded?)");
 }
 
 switch (cmd) {
@@ -84,13 +84,13 @@ switch (cmd) {
             console.error('Set SP_MPR or "mpr" in local.config.json (see local.config.example.json).');
             process.exit(1);
         }
-        // nie dotykamy cudzych instancji: jeśli Studio Pro już działa (np. F5 z VS Code), przerywamy
+        // never touch other instances: if Studio Pro is already running (e.g. F5 from VS Code), stop here
         const running = runningPids();
         if (running.length) {
-            console.error(`Studio Pro już działa (pid ${running.join(", ")}) – zamknij je ręcznie; sp.mjs nie zamyka cudzych instancji.`);
+            console.error(`Studio Pro is already running (pid ${running.join(", ")}) – close it yourself; sp.mjs never closes other instances.`);
             process.exit(1);
         }
-        // SP_NODEV=1: bez flag deweloperskich – jak u użytkownika, który zainstalował rozszerzenie z Marketplace
+        // SP_NODEV=1: no dev flags, like a user who installed the extension from the Marketplace
         const flags = process.env.SP_NODEV ? [] : ["--enable-extension-development", "--enable-web-extensions"];
         const child = spawn(STUDIO_PRO, [MPR, ...flags], {
             detached: true,
@@ -99,42 +99,42 @@ switch (cmd) {
         });
         child.unref();
         writeFileSync(PID_FILE, String(child.pid));
-        console.log(`Studio Pro ${SP_VERSION} uruchomione (pid ${child.pid}), CDP na porcie ${PORT}`);
+        console.log(`Studio Pro ${SP_VERSION} started (pid ${child.pid}), CDP on port ${PORT}`);
         break;
     }
     case "stop": {
-        // zamyka tylko instancję uruchomioną przez `sp.mjs start`; bez /F – zwykłe zamknięcie okna
+        // closes only the instance started by `sp.mjs start`; no /F, a normal window close
         const pid = existsSync(PID_FILE) ? Number(readFileSync(PID_FILE, "utf8")) : 0;
         if (!pid || !runningPids().includes(pid)) {
             rmSync(PID_FILE, { force: true });
-            console.log("Brak instancji uruchomionej przez sp.mjs");
+            console.log("No instance started by sp.mjs");
             break;
         }
-        try { execSync(`taskkill /PID ${pid}`, { stdio: "ignore" }); } catch { /* już zamknięte */ }
+        try { execSync(`taskkill /PID ${pid}`, { stdio: "ignore" }); } catch { /* already closed */ }
         for (let i = 0; i < 60 && runningPids().includes(pid); i++) await new Promise(r => setTimeout(r, 1000));
         rmSync(PID_FILE, { force: true });
-        console.log("Studio Pro zamknięte");
+        console.log("Studio Pro closed");
         break;
     }
     case "wait": {
-        // czeka aż rozszerzenie wystawi globalThis.todoExplorer
+        // waits until the extension exposes globalThis.todoExplorer
         for (let i = 0; ; i++) {
             try { (await extensionTarget()).close(); break; }
             catch (e) { if (i > 60) throw e; await new Promise(r => setTimeout(r, 2000)); }
         }
-        console.log("Rozszerzenie gotowe");
+        console.log("Extension ready");
         break;
     }
     case "shot": {
-        // zrzut ekranu strony (np. panelu): node scripts/sp.mjs shot uiEntryPoint=pane out.png
+        // page screenshot (e.g. the pane): node scripts/sp.mjs shot uiEntryPoint=pane out.png
         const [needle, file] = rest;
         const page = (await targets()).find(t => t.type === "page" && t.url.includes(needle));
-        if (!page) throw new Error(`Brak strony z "${needle}" w URL`);
+        if (!page) throw new Error(`No page with "${needle}" in its URL`);
         const c = await connect(page.webSocketDebuggerUrl);
         const r = await c.send("Page.captureScreenshot", { format: "png" });
         c.close();
         writeFileSync(file, Buffer.from(r.result.data, "base64"));
-        console.log(`Zapisano ${file}`);
+        console.log(`Saved ${file}`);
         break;
     }
     case "targets":
@@ -170,5 +170,5 @@ switch (cmd) {
         break;
     }
     default:
-        console.log("Użycie: node scripts/sp.mjs start|stop|wait|targets|eval <wyrażenie>|logs [s]|shot <url> <png>");
+        console.log("Usage: node scripts/sp.mjs start|stop|wait|targets|eval <expression>|logs [s]|shot <url> <png>");
 }

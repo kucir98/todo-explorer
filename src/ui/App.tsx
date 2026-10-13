@@ -49,7 +49,7 @@ export function App({ studioPro }: { studioPro: StudioPro }) {
     }, []);
 
     useEffect(() => {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch { /* brak storage – ignorujemy */ }
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch { /* no storage available – ignore */ }
     }, [saved]);
 
     const documents = state?.documents ?? [];
