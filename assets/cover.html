@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; }
+  body { width: 600px; height: 240px; overflow: hidden; font-family: "Segoe UI", system-ui, sans-serif; zoom: var(--zoom, 1); }
+  .cover { position: relative; width: 600px; height: 240px; background: #0f1b2d; color: #ffffff; display: flex; align-items: center; overflow: hidden; }
+  .glow { position: absolute; right: -80px; top: -60px; width: 360px; height: 360px; border-radius: 50%; background: #1d3a5f; }
+  .text { position: relative; padding-left: 36px; width: 270px; }
+  .title { font-size: 34px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.05; margin: 0; }
+  .title span { color: #7cc4ff; }
+  .tag { margin: 12px 0 0; font-size: 13.5px; line-height: 1.45; color: #c3d2e6; }
+  .pane { position: relative; margin-left: 22px; width: 250px; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.35); color: #1e1e1e; font-size: 11px; overflow: hidden; }
+  .bar { display: flex; gap: 5px; align-items: center; padding: 7px 9px; border-bottom: 1px solid #e6e6e6; background: #f7f7f7; }
+  .bar .t { font-weight: 600; font-size: 10.5px; margin-right: auto; color: #333; }
+  .badge { font: 9.5px Consolas, monospace; padding: 1px 5px; border-radius: 3px; }
+  .TODO { background: #e6f1fb; color: #0c447c; }
+  .FIXME { background: #fcebeb; color: #791f1f; }
+  .HACK { background: #faeeda; color: #633806; }
+  .row { display: flex; align-items: center; gap: 6px; padding: 3px 9px; white-space: nowrap; }
+  .row.sel { background: #e8f2fc; }
+  .muted { color: #8a8a8a; }
+  .kind { font-size: 8.5px; color: #8a8a8a; border: 1px solid #ddd; border-radius: 2px; padding: 0 3px; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="glow"></div>
+  <div class="text">
+    <p class="title">TODO<br><span>Explorer</span></p>
+    <p class="tag">Every TODO, FIXME and HACK from your microflows and nanoflows in one pane. Click to jump straight to it.</p>
+  </div>
+  <div class="pane">
+    <div class="bar"><span class="t">TODO Explorer</span><span class="badge TODO">TODO 2</span><span class="badge FIXME">FIXME 1</span><span class="badge HACK">HACK 1</span></div>
+    <div class="row"><span class="muted">▾</span>Sales <span class="muted">3</span></div>
+    <div class="row" style="padding-left:20px"><span class="muted">▾</span><span class="kind">MF</span>ACT_Order_Submit</div>
+    <div class="row sel" style="padding-left:44px"><span class="badge TODO">TODO</span>validate postal code</div>
+    <div class="row" style="padding-left:44px"><span class="badge FIXME">FIXME</span>retry on timeout <span class="muted">+2 lines</span></div>
+    <div class="row" style="padding-left:20px"><span class="muted">▾</span><span class="kind">NF</span>ACT_Cart_Refresh</div>
+    <div class="row" style="padding-left:44px"><span class="badge HACK">HACK</span>widget workaround</div>
+    <div class="row"><span class="muted">▾</span>Customers <span class="muted">1</span></div>
+    <div class="row" style="padding-left:44px;padding-bottom:7px"><span class="badge TODO">TODO</span>remove after migration</div>
+  </div>
+</div>
+</body>
+</html>
